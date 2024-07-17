@@ -48,8 +48,6 @@ def openai_article_generator(question, context):
 
     intro_para = res.content
     
-    print("intro_para: ", intro_para)
-
     messages.extend([
         {
             "role": "assistant",
@@ -61,8 +59,6 @@ def openai_article_generator(question, context):
         }
     ]
     )
-
-    print("messages: ", messages)
 
     res = openai_chat.invoke(messages)
 
