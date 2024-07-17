@@ -74,7 +74,7 @@ def process_text(input_text):
 
     article = openai_article_generator("Is a Parenting Plan Legally Binding in Australia", context_str)
 
-    return article
+    return article, context['matches']
 
 
 def main():
@@ -86,10 +86,20 @@ def main():
     # Check if the user has entered something
     if user_input:
         # Call the function with the user's input
-        result = process_text(user_input)
+        result, contexts = process_text(user_input)
 
         # Display the result
         st.write(result)
+
+        if st.button("References"):
+            for i, context in enumerate(contexts, 1):
+                st.subheader(f"Reference {i}")
+                st.write(f"File Name: {context['metadata'].get('file_name', 'N/A')}")
+                st.write(f"Page Number: {int(context['metadata'].get('page_number', 'N/A'))}")
+                st.write("Text:")
+                st.text(context['metadata'].get('chunk_text', 'N/A'))
+                st.write("---")
+
 
 if __name__ == "__main__":
     main()
