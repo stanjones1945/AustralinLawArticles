@@ -80,6 +80,8 @@ def process_text(input_text):
 def main():
     st.title("Legal Article Generator")
 
+    selected_option = st.selectbox("Select type of law:", ['Family Law', 'Property Law', 'Civil Law', 'Corporate Law'])
+
     # Create an input field
     user_input = st.text_input("Enter your question:")
 
