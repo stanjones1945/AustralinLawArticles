@@ -3,6 +3,7 @@ from pinecone import Pinecone, ServerlessSpec
 from langchain_openai import OpenAIEmbeddings
 from langchain.chat_models import ChatOpenAI
 
+st.set_page_config(page_title="Legal Article Generator", page_icon="💬")
 
 openai_api_key = st.secrets.openai_api_key
 pinecone_api_key = st.secrets.PINECONE_API_KEY
@@ -66,13 +67,13 @@ def openai_article_generator(question, context):
 
 
 def process_text(input_text):
-    print("processing text")
+    print("processing text:", input_text)
     context = rag_search(input_text, "FamilyLaw", 10)
 
     context_list = [c["metadata"]["chunk_text"] for c in context['matches']]
     context_str = "\n\n".join(context_list)
 
-    article = openai_article_generator("Is a Parenting Plan Legally Binding in Australia", context_str)
+    article = openai_article_generator(input_text, context_str)
 
     return article, context['matches']
 
