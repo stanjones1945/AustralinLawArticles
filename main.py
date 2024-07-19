@@ -78,7 +78,8 @@ def process_text(input_text):
 
 
 def main():
-    st.title("Legal Article Generator")
+    st.markdown("<h1 style='text-align: center'>Legal Article Generator</h1>", unsafe_allow_html=True)
+
     col1, col2 = st.columns([1, 2])
     selected_option = col1.selectbox("Select type of law:", ['Family Law', 'Property Law', 'Civil Law', 'Corporate Law'])
 
