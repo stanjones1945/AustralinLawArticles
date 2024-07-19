@@ -83,7 +83,7 @@ def main():
     selected_option = st.selectbox("Select type of law:", ['Family Law', 'Property Law', 'Civil Law', 'Corporate Law'])
 
     # Create an input field
-    user_input = st.text_input("Enter your question:")
+    user_input = st.text_area("Enter your question:")
 
     # Check if the user has entered something
     if user_input:
