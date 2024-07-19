@@ -1,7 +1,10 @@
+import json
 import streamlit as st
 from pinecone import Pinecone, ServerlessSpec
 from langchain_openai import OpenAIEmbeddings
 from langchain.chat_models import ChatOpenAI
+from streamlit_lottie import st_lottie
+
 
 st.set_page_config(page_title="Legal Article Generator", page_icon="💬")
 
@@ -79,6 +82,16 @@ def process_text(input_text):
 
 
 def main():
+
+    with open("anima.json") as source:
+        animation = json.load(source)
+
+
+    col1, col2, col3 = st.columns(3)
+
+    with col2:
+        st_lottie(animation, width=200, height=200)
+
     st.markdown("<h1 style='text-align: center'>Legal Article Generator</h1>", unsafe_allow_html=True)
 
     col1, col2 = st.columns([1, 2])
