@@ -66,7 +66,7 @@ def openai_article_generator(question, context):
 
 
 def process_text(input_text):
-
+    print("processing text")
     context = rag_search(input_text, "FamilyLaw", 10)
 
     context_list = [c["metadata"]["chunk_text"] for c in context['matches']]
@@ -93,14 +93,14 @@ def main():
         # Display the result
         st.write(result)
 
-        if st.button("References"):
-            for i, context in enumerate(contexts, 1):
-                st.subheader(f"Reference {i}")
-                st.write(f"File Name: {context['metadata'].get('file_name', 'N/A')}")
-                st.write(f"Page Number: {int(context['metadata'].get('page_number', 'N/A'))}")
-                st.write("Text:")
-                st.text(context['metadata'].get('chunk_text', 'N/A'))
-                st.write("---")
+        # if st.button("References"):
+        for i, context in enumerate(contexts, 1):
+            st.subheader(f"Reference {i}")
+            st.write(f"File Name: {context['metadata'].get('file_name', 'N/A')}")
+            st.write(f"Page Number: {int(context['metadata'].get('page_number', 'N/A'))}")
+            st.write("Text:")
+            st.text(context['metadata'].get('chunk_text', 'N/A'))
+            st.write("---")
 
 
 if __name__ == "__main__":
