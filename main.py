@@ -3,17 +3,21 @@ import streamlit as st
 from pinecone import Pinecone, ServerlessSpec
 from langchain_openai import OpenAIEmbeddings
 from langchain.chat_models import ChatOpenAI
+from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_google_genai import ChatGoogleGenerativeAI
 from streamlit_lottie import st_lottie
 
 
 st.set_page_config(page_title="Legal Article Generator", page_icon="💬")
 
 openai_api_key = st.secrets.openai_api_key
+gemini_api_key = st.secrets.GOOGLE_API_KEY
 pinecone_api_key = st.secrets.PINECONE_API_KEY
 
 
 embedding_model = OpenAIEmbeddings(api_key=openai_api_key, model="text-embedding-3-small")
 openai_chat = ChatOpenAI(model_name='gpt-3.5-turbo', temperature=0.5, api_key=openai_api_key)
+gemini_chat = ChatGoogleGenerativeAI(model="gemini-1.5-pro", api_key=gemini_api_key, temperature=0.5)
 
 pc = Pinecone(api_key=st.secrets.PINECONE_API_KEY)
 index = pc.Index("legalarticlegenerator")
@@ -29,6 +33,7 @@ def rag_search(query, namespace, top_k):
 
 
 def openai_article_generator(question, context):
+    print("using Openai model on question:", question)
     messages=[
             {
                 "role": "system",
@@ -69,15 +74,49 @@ def openai_article_generator(question, context):
     return intro_para + "\n\n" + res.content
 
 
-def process_text(input_text):
-    print("processing text:", input_text)
+def gemini_article_generator(question, context):
+    print("using Gemini model on question:", question)
+    messages = [
+        ("system", "You are an article writer for a legal blog."),
+        ("user", f"""
+    Use the following context to write a short first paragraph that answer for the user's query. If you cannot answer using the context then, please respond with 'I don't know'.
+                
+    User's Query:
+    {question}
+
+    Context:
+    {context}
+    """)
+    ]
+
+    res = gemini_chat.invoke(messages)
+
+    intro_para = res.content
+
+    messages.extend([
+        ("assistant", intro_para),
+        ("user", "Now generate the remaining article, of at least 1000 words, starting from second paragraph based on the context and the user's query.")
+    ])
+
+    res = gemini_chat.invoke(messages)
+
+    return intro_para + "\n\n" + res.content
+
+
+def process_text(input_text, model_name="GPT 3.5 Turbo"):
     context = rag_search(input_text, "FamilyLaw", 10)
 
     context_list = [c["metadata"]["chunk_text"] for c in context['matches']]
     context_str = "\n\n".join(context_list)
+    
+    if model_name == "GPT 3.5 Turbo":
+        article = openai_article_generator(input_text, context_str)
+    elif model_name == "Gemini 1.5 Pro":
+        article = gemini_article_generator(input_text, context_str)
 
-    article = openai_article_generator(input_text, context_str)
-
+    if article.find("I don't know") == 0:
+        article = "Sorry, I couldn't find a relevant data to generate an article for your query."
+        context['matches'] = []
     return article, context['matches']
 
 
@@ -90,32 +129,43 @@ def main():
     col1, col2, col3 = st.columns(3)
 
     with col2:
-        st_lottie(animation, width=200, height=200)
+        st_lottie(animation, height=100)
 
-    st.markdown("<h1 style='text-align: center'>Legal Article Generator</h1>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center;'>Legal Article Generator</h2>", unsafe_allow_html=True)
 
-    col1, col2 = st.columns([1, 2])
-    selected_option = col1.selectbox("Select type of law:", ['Family Law', 'Property Law', 'Civil Law', 'Corporate Law'])
+    col1, col2, col3 = st.columns(3)
+    model_name = col1.selectbox("Select LLM:", ['GPT 3.5 Turbo', 'Gemini 1.5 Pro'])
+    law_type = col3.selectbox("Select type of law:", ['Family Law', 'Property Law', 'Civil Law', 'Corporate Law'])
 
     # Create an input field
     user_input = st.text_area("Enter your question:")
 
-    # Check if the user has entered something
-    if user_input:
-        # Call the function with the user's input
-        result, contexts = process_text(user_input)
+    if st.button("Generate Article"):
 
-        # Display the result
-        st.write(result)
+        # Check if the user has entered something
+        if user_input:
 
-        # if st.button("References"):
-        for i, context in enumerate(contexts, 1):
-            st.subheader(f"Reference {i}")
-            st.write(f"File Name: {context['metadata'].get('file_name', 'N/A')}")
-            st.write(f"Page Number: {int(context['metadata'].get('page_number', 'N/A'))}")
-            st.write("Text:")
-            st.text(context['metadata'].get('chunk_text', 'N/A'))
+            if len(user_input) >  1000:
+                st.warning("Please enter a question with less than 1000 characters.")
+                return
+
+            # Call the function with the user's input
+            result, contexts = process_text(user_input, model_name)
+
+            # Display the result
+            st.write(result)
             st.write("---")
+
+            # Display
+            for i, context in enumerate(contexts, 1):
+                st.subheader(f"Reference {i}")
+                st.write(f"File Name: {context['metadata'].get('file_name', 'N/A')}")
+                st.write(f"Page Number: {int(context['metadata'].get('page_number', 'N/A'))}")
+                st.write("Text:")
+                st.text(context['metadata'].get('chunk_text', 'N/A'))
+                st.write("---")
+        else:
+            st.warning("Please enter a question before generating the article.")
 
 
 if __name__ == "__main__":
