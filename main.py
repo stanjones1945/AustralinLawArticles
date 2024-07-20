@@ -122,6 +122,13 @@ def process_text(input_text, model_name="GPT 3.5 Turbo"):
 
 def main():
 
+    if 'model_name' not in st.session_state:
+        st.session_state.model_name = 'GPT 3.5 Turbo'
+    if 'law_type' not in st.session_state:
+        st.session_state.law_type = 'Family Law'
+    if 'user_input' not in st.session_state:
+        st.session_state.user_input = ''
+
     with open("anima.json") as source:
         animation = json.load(source)
 
@@ -134,11 +141,11 @@ def main():
     st.markdown("<h2 style='text-align: center;'>Legal Article Generator</h2>", unsafe_allow_html=True)
 
     col1, col2, col3 = st.columns(3)
-    model_name = col1.selectbox("Select LLM:", ['GPT 3.5 Turbo', 'Gemini 1.5 Pro'])
-    law_type = col3.selectbox("Select type of law:", ['Family Law', 'Property Law', 'Civil Law', 'Corporate Law'])
+    model_name = col1.selectbox("Select LLM:", ['GPT 3.5 Turbo', 'Gemini 1.5 Pro'], key='model_name')
+    law_type = col3.selectbox("Select type of law:", ['Family Law', 'Property Law', 'Civil Law', 'Corporate Law'], key='law_type')
 
     # Create an input field
-    user_input = st.text_area("Enter your question:")
+    user_input = st.text_area("Enter your question:", key='user_input')
 
     if st.button("Generate Article"):
 
@@ -150,7 +157,7 @@ def main():
                 return
 
             # Call the function with the user's input
-            result, contexts = process_text(user_input, model_name)
+            result, contexts = process_text(st.session_state.user_input, st.session_state.model_name)
 
             # Display the result
             st.write(result)
