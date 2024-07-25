@@ -138,7 +138,6 @@ def main():
     with open("anima.json") as source:
         animation = json.load(source)
 
-    st.write(f"Model Name: {st.session_state.model_name} | Law Type: {st.session_state.law_type} | User Input: {st.session_state.user_input}")
 
     col1, col2, col3 = st.columns(3)
 
