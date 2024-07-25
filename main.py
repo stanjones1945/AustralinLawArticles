@@ -16,7 +16,7 @@ pinecone_api_key = st.secrets.PINECONE_API_KEY
 
 
 embedding_model = OpenAIEmbeddings(api_key=openai_api_key, model="text-embedding-3-small")
-openai_chat = ChatOpenAI(model_name='gpt-3.5-turbo', temperature=0.5, api_key=openai_api_key)
+openai_chat = ChatOpenAI(model_name='gpt-4o-mini', temperature=0.5, api_key=openai_api_key)
 gemini_chat = ChatGoogleGenerativeAI(model="gemini-1.5-pro", api_key=gemini_api_key, temperature=0.5)
 
 pc = Pinecone(api_key=st.secrets.PINECONE_API_KEY)
@@ -103,13 +103,13 @@ def gemini_article_generator(question, context):
     return intro_para + "\n\n" + res.content
 
 
-def process_text(input_text, model_name="GPT 3.5 Turbo"):
+def process_text(input_text, model_name="GPT 4o mini"):
     context = rag_search(input_text, "FamilyLaw", 10)
 
     context_list = [c["metadata"]["chunk_text"] for c in context['matches']]
     context_str = "\n\n".join(context_list)
     
-    if model_name == "GPT 3.5 Turbo":
+    if model_name == "GPT 4o mini":
         article = openai_article_generator(input_text, context_str)
     elif model_name == "Gemini 1.5 Pro":
         article = gemini_article_generator(input_text, context_str)
@@ -123,7 +123,7 @@ def process_text(input_text, model_name="GPT 3.5 Turbo"):
 def main():
 
     if 'model_name' not in st.session_state:
-        st.session_state.model_name = 'GPT 3.5 Turbo'
+        st.session_state.model_name = 'GPT 4o mini'
     if 'law_type' not in st.session_state:
         st.session_state.law_type = 'Family Law'
     if 'user_input' not in st.session_state:
@@ -141,7 +141,7 @@ def main():
     st.markdown("<h2 style='text-align: center;'>Legal Article Generator</h2>", unsafe_allow_html=True)
 
     col1, col2, col3 = st.columns(3)
-    model_name = col1.selectbox("Select LLM:", ['GPT 3.5 Turbo', 'Gemini 1.5 Pro'], key='model_name')
+    model_name = col1.selectbox("Select LLM:", ['GPT 4o mini', 'Gemini 1.5 Pro'], key='model_name')
     law_type = col3.selectbox("Select type of law:", ['Family Law', 'Property Law', 'Civil Law', 'Corporate Law'], key='law_type')
 
     # Create an input field
