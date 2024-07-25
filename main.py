@@ -152,18 +152,18 @@ def main():
     law_type = col3.selectbox("Select type of law:", ['Family Law', 'Property Law', 'Civil Law', 'Corporate Law'], key='law_type')
 
     # Create an input field
-    user_input = st.text_area("timeEnter your question:", key='user_input')
+    user_input = st.text_area("Enter your question:", key='user_input')
 
 
 
     if st.button("Generate Article"):
 
         # Check if the user has entered something
-        # if user_input:
+        if user_input:
 
-        #     if len(user_input) >  1000:
-        #         st.warning("Please enter a question with less than 1000 characters.")
-        #         return
+            if len(user_input) >  1000:
+                st.warning("Please enter a question with less than 1000 characters.")
+                return
 
             # Call the function with the user's input
             result, contexts = process_text(st.session_state.user_input, st.session_state.model_name)
@@ -180,8 +180,8 @@ def main():
                 st.write("Text:")
                 st.text(context['metadata'].get('chunk_text', 'N/A'))
                 st.write("---")
-        # else:
-        #     st.warning("Please enter a question before generating the article.")
+        else:
+            st.warning("Please enter a question before generating the article.")
 
 
 if __name__ == "__main__":
