@@ -135,6 +135,7 @@ def main():
     if 'user_input' not in st.session_state:
         st.session_state.user_input = ''
 
+    print(f"Model Name: {st.session_state.model_name} | Law Type: {st.session_state.law_type} | User Input: {st.session_state.user_input}")
 
     with open("anima.json") as source:
         animation = json.load(source)
