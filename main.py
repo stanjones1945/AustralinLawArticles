@@ -5,7 +5,7 @@ from langchain_openai import OpenAIEmbeddings
 from langchain.chat_models import ChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
-# from streamlit_lottie import st_lottie
+from streamlit_lottie import st_lottie
 
 
 st.set_page_config(page_title="Legal Article Generator", page_icon="💬")
@@ -141,8 +141,8 @@ def main():
 
     col1, col2, col3 = st.columns(3)
 
-    # with col2:
-    #     st_lottie(animation, height=100)
+    with col2:
+        st_lottie(animation, height=100)
 
     st.markdown("<h2 style='text-align: center;'>Legal Article Generator</h2>", unsafe_allow_html=True)
 
