@@ -57,6 +57,9 @@ def openai_article_generator(question, context):
 
     intro_para = res.content
     
+    if intro_para.find("I don't know") == 0:
+        return intro_para  
+      
     messages.extend([
         {
             "role": "assistant",
@@ -92,6 +95,9 @@ def gemini_article_generator(question, context):
     res = gemini_chat.invoke(messages)
 
     intro_para = res.content
+
+    if intro_para.find("I don't know") == 0:
+        return intro_para
 
     messages.extend([
         ("assistant", intro_para),
