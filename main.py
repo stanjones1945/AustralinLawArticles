@@ -126,6 +126,11 @@ def process_text(input_text, model_name="GPT 4o mini"):
     return article, context['matches']
 
 
+@st.cache_data
+def load_lottie_animation():
+    with open("anima.json") as source:
+        return json.load(source)
+
 def main():
 
     if 'model_name' not in st.session_state:
@@ -135,9 +140,8 @@ def main():
     if 'user_input' not in st.session_state:
         st.session_state.user_input = ''
 
-    with open("anima.json") as source:
-        animation = json.load(source)
-
+    # Load the animation once and cache it
+    animation = load_lottie_animation()
 
     col1, col2, col3 = st.columns(3)
 
