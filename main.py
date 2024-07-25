@@ -148,11 +148,11 @@ def main():
     st.markdown("<h2 style='text-align: center;'>Legal Article Generator</h2>", unsafe_allow_html=True)
 
     col1, col2, col3 = st.columns(3)
-    model_name = col1.selectbox("Select LLM:", ['GPT 4o mini', 'Gemini 1.5 Pro'], key='model_name')
-    law_type = col3.selectbox("Select type of law:", ['Family Law', 'Property Law', 'Civil Law', 'Corporate Law'], key='law_type')
+    model_name = col1.selectbox("Select LLM:", ['GPT 4o mini', 'Gemini 1.5 Pro'], key='model_name', index=['GPT 4o mini', 'Gemini 1.5 Pro'].index(st.session_state.model_name))
+    law_type = col3.selectbox("Select type of law:", ['Family Law', 'Property Law', 'Civil Law', 'Corporate Law'], key='law_type', index=['Family Law', 'Property Law', 'Civil Law', 'Corporate Law'].index(st.session_state.law_type))
 
     # Create an input field
-    user_input = st.text_area("Enter your question:", key='user_input')
+    user_input = st.text_area("Enter your question:", key='user_input', value=st.session_state.user_input)
 
 
 
