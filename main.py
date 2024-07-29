@@ -32,7 +32,7 @@ def rag_search(query, namespace, top_k):
     return res
 
 
-def openai_article_generator(question, context):
+def openai_article_generator(question, context, article_placeholder):
     print("using Openai model on question:", question)
     messages=[
             {
@@ -53,9 +53,10 @@ def openai_article_generator(question, context):
             }
         ]
 
-    res = openai_chat.invoke(messages)
-
-    intro_para = res.content
+    intro_para = ""
+    for chunk in openai_chat.stream(messages):
+        intro_para += chunk.content
+        article_placeholder.write(intro_para, unsafe_allow_html=True)
     
     if intro_para.find("I don't know") == 0:
         return intro_para  
@@ -72,12 +73,16 @@ def openai_article_generator(question, context):
     ]
     )
 
-    res = openai_chat.invoke(messages)
+    full_article = intro_para + "\n\n"
 
-    return intro_para + "\n\n" + res.content
+    for chunk in openai_chat.stream(messages):
+        full_article += chunk.content
+        article_placeholder.write(full_article, unsafe_allow_html=True)
+
+    return full_article
 
 
-def gemini_article_generator(question, context):
+def gemini_article_generator(question, context, article_placeholder):
     print("using Gemini model on question:", question)
     messages = [
         ("system", "You are an article writer for a legal blog."),
@@ -92,9 +97,12 @@ def gemini_article_generator(question, context):
     """)
     ]
 
-    res = gemini_chat.invoke(messages)
+    intro_para = ""
 
-    intro_para = res.content
+    for chunk in gemini_chat.stream(messages):
+        intro_para += chunk.content
+        article_placeholder.write(intro_para, unsafe_allow_html=True)
+
 
     if intro_para.find("I don't know") == 0:
         return intro_para
@@ -104,26 +112,29 @@ def gemini_article_generator(question, context):
         ("user", "Now generate the remaining article, of at least 1000 words, starting from second paragraph based on the context and the user's query.")
     ])
 
-    res = gemini_chat.invoke(messages)
+    full_article = intro_para + "\n\n"
 
-    return intro_para + "\n\n" + res.content
+    for chunk in gemini_chat.stream(messages):
+        full_article += chunk.content
+        article_placeholder.write(full_article, unsafe_allow_html=True)
+        
+    return full_article
 
 
-def process_text(input_text, model_name="GPT 4o mini"):
+def process_text(input_text, model_name="GPT 4o mini", article_placeholder=None):
     context = rag_search(input_text, "FamilyLaw", 10)
 
     context_list = [c["metadata"]["chunk_text"] for c in context['matches']]
     context_str = "\n\n".join(context_list)
     
     if model_name == "GPT 4o mini":
-        article = openai_article_generator(input_text, context_str)
+        article = openai_article_generator(input_text, context_str, article_placeholder)
     elif model_name == "Gemini 1.5 Pro":
-        article = gemini_article_generator(input_text, context_str)
+        article = gemini_article_generator(input_text, context_str, article_placeholder)
 
     if article.find("I don't know") == 0:
-        article = "Sorry, I couldn't find a relevant data to generate an article for your query."
         context['matches'] = []
-    return article, context['matches']
+    return context['matches']
 
 
 def main():
@@ -163,11 +174,13 @@ def main():
                 st.warning("Please enter a question with less than 1000 characters.")
                 return
 
+            article_placeholder = st.empty()
+
             # Call the function with the user's input
-            result, contexts = process_text(st.session_state.user_input, st.session_state.model_name)
+            contexts = process_text(st.session_state.user_input, st.session_state.model_name, article_placeholder)
 
             # Display the result
-            st.write(result)
+            # st.write(result)
             st.write("---")
 
             # Display
