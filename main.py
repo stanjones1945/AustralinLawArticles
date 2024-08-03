@@ -161,7 +161,7 @@ def main():
     law_type = col3.selectbox("Select type of law:", ['Family Law', 'Property Law', 'Civil Law', 'Corporate Law'], key='law_type', index=['Family Law', 'Property Law', 'Civil Law', 'Corporate Law'].index(st.session_state.law_type))
 
     # Create an input field
-    user_input = st.text_area("Enter your question:", key='user_input', value=st.session_state.user_input)
+    user_input = st.text_area("Enter your question here:", key='user_input', value=st.session_state.user_input)
 
 
 
