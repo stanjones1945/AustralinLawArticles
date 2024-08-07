@@ -216,8 +216,8 @@ def main():
 
     col1, col2, col3 = st.columns(3)
 
-    generate_article = col1.button("Generate Article")
-    research = col3.button("Research")
+    generate_article = col1.button("Generate Article", use_container_width=True)
+    research = col3.button("Research", use_container_width=True)
 
     if generate_article or research:
 
