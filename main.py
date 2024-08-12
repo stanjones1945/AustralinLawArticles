@@ -27,21 +27,6 @@ index = pc.Index("legalarticlegenerator")
 cross_encoder = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
 
 
-st.markdown("""
-<style>
-    .stTextArea textarea:disabled {
-        color: #000000 !important;
-        background-color: #0E1117 !important;
-        font-size: 1rem !important;
-        line-height: 1.5 !important;
-        border: 1px solid #262730 !important;
-        opacity: 1 !important;
-        cursor: default !important;
-    }
-</style>
-""", unsafe_allow_html=True)
-
-
 def augment_multiple_query(query):
     messages = [
         {
@@ -200,12 +185,6 @@ def process_text(input_text, model_name="GPT 4o mini", article_placeholder=None)
     return context
 
 
-def calculate_height(text, chars_per_line=80, pixels_per_line=30, min_height=100, max_height=500):
-    num_lines = math.ceil(len(text) / chars_per_line)
-    height = max(min_height, min(max_height, num_lines * pixels_per_line))
-    return height
-
-
 def main():
 
     if 'model_name' not in st.session_state:
@@ -263,13 +242,8 @@ def main():
                 st.write(f"File Name: {context[1]}")
                 st.write(f"Page Number: {int(context[2])+1}")
 
-                content_height = calculate_height(context[0])
-
-                # st.write("Text:")
-                # st.markdown(context[0])
-                # st.write(context[0], unsafe_allow_html=True)
-                st.text_area("Text:", value=context[0], height=content_height, disabled=True)
-                # st.text(context[0])
+                st.write("Text:")
+                st.write(context[0].replace('\n', '<br>'), unsafe_allow_html=True)
                 st.write("---")
         else:
             st.warning("Please enter a question before generating the article.")
