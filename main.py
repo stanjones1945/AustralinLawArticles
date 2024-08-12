@@ -8,6 +8,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from streamlit_lottie import st_lottie
 from sentence_transformers import CrossEncoder
 import numpy as np
+import math
 
 
 st.set_page_config(page_title="Legal Article Generator", page_icon="💬")
@@ -24,6 +25,21 @@ pc = Pinecone(api_key=st.secrets.PINECONE_API_KEY)
 index = pc.Index("legalarticlegenerator")
 
 cross_encoder = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
+
+
+st.markdown("""
+<style>
+    .stTextArea textarea:disabled {
+        color: #000000 !important;
+        background-color: #0E1117 !important;
+        font-size: 1rem !important;
+        line-height: 1.5 !important;
+        border: 1px solid #262730 !important;
+        opacity: 1 !important;
+        cursor: default !important;
+    }
+</style>
+""", unsafe_allow_html=True)
 
 
 def augment_multiple_query(query):
@@ -167,14 +183,10 @@ def gemini_article_generator(question, context, article_placeholder):
 
 
 def process_text(input_text, model_name="GPT 4o mini", article_placeholder=None):
-    # context = rag_search(input_text, "FamilyLaw", 10)
 
     context = advanced_rag_search(input_text, return_documents=10)
 
     context_str = "\n\n".join([c[0] for c in context])
-
-    # context_list = [c["metadata"]["chunk_text"] for c in context['matches']]
-    # context_str = "\n\n".join(context_list)
     
     if article_placeholder:
         if model_name == "GPT 4o mini":
@@ -186,6 +198,12 @@ def process_text(input_text, model_name="GPT 4o mini", article_placeholder=None)
             context = []
 
     return context
+
+
+def calculate_height(text, chars_per_line=80, pixels_per_line=30, min_height=100, max_height=500):
+    num_lines = math.ceil(len(text) / chars_per_line)
+    height = max(min_height, min(max_height, num_lines * pixels_per_line))
+    return height
 
 
 def main():
@@ -234,8 +252,6 @@ def main():
                 # Call the function with the user's input
                 contexts = process_text(st.session_state.user_input, st.session_state.model_name, article_placeholder)
 
-                # Display the result
-                # st.write(result)
                 st.write("---")
             
             else:
@@ -245,9 +261,15 @@ def main():
             for i, context in enumerate(contexts, 1):
                 st.subheader(f"Reference {i}")
                 st.write(f"File Name: {context[1]}")
-                st.write(f"Page Number: {int(context[2])}")
-                st.write("Text:")
-                st.text(context[0])
+                st.write(f"Page Number: {int(context[2])+1}")
+
+                content_height = calculate_height(context[0])
+
+                # st.write("Text:")
+                # st.markdown(context[0])
+                # st.write(context[0], unsafe_allow_html=True)
+                st.text_area("Text:", value=context[0], height=content_height, disabled=True)
+                # st.text(context[0])
                 st.write("---")
         else:
             st.warning("Please enter a question before generating the article.")
